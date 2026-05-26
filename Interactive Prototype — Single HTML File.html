@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Library — Interactive Prototype</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f3ee; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const books = [
+  { id:1, emoji:"📘", title:"The Midnight Library", author:"Matt Haig", genre:"Fiction", available:true, due:null, cover:"#fef3c7" },
+  { id:2, emoji:"📗", title:"Atomic Habits", author:"James Clear", genre:"Self-Help", available:false, due:"20 Jun", cover:"#dbeafe" },
+  { id:3, emoji:"📕", title:"Educated", author:"Tara Westover", genre:"Memoir", available:true, due:null, cover:"#fce7f3" },
+  { id:4, emoji:"📙", title:"Project Hail Mary", author:"Andy Weir", genre:"Sci-Fi", available:true, due:null, cover:"#dcfce7" },
+  { id:5, emoji:"📓", title:"Klara and the Sun", author:"Kazuo Ishiguro", genre:"Fiction", available:false, due:"28 Jun", cover:"#ede9fe" },
+];
+
+const S = {
+  wrap: { display:"flex", flexDirection:"column", alignItems:"center" },
+  phone: { width:320, height:640, background:"#faf7f2", border:"3px solid #1c1917", borderRadius:36, overflow:"hidden", boxShadow:"6px 6px 0 #1c1917", display:"flex", flexDirection:"column", position:"relative" },
+  notch: { height:28, background:"#1c1917", display:"flex", alignItems:"flex-end", justifyContent:"center", paddingBottom:4, flexShrink:0 },
+  notchBar: { width:60, height:5, background:"#44403c", borderRadius:3 },
+  screen: (anim) => ({ flex:1, overflow:"hidden", display:"flex", flexDirection:"column", opacity:anim?0:1, transition:"opacity 0.2s" }),
+  nav: { background:"#1c1917", padding:"10px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 },
+  logo: { fontFamily:"Georgia,serif", fontSize:14, color:"#faf7f2", fontWeight:700 },
+  back: { fontSize:11, color:"#a8a29e", cursor:"pointer" },
+  content: { flex:1, overflowY:"auto", padding:"14px" },
+  bottomNav: { height:52, background:"white", borderTop:"1px solid #e2dbd2", display:"flex", alignItems:"center", justifyContent:"space-around", flexShrink:0 },
+  bnItem: (a) => ({ display:"flex", flexDirection:"column", alignItems:"center", gap:2, cursor:"pointer", opacity:a?1:0.5 }),
+  bnText: (a) => ({ fontSize:9, color:a?"#b5451b":"#78716c", fontWeight:a?600:400 }),
+  hero: { background:"linear-gradient(135deg,#1c1917,#1c3829)", padding:"20px 14px", flexShrink:0 },
+  eyebrow: { fontFamily:"monospace", fontSize:9, textTransform:"uppercase", letterSpacing:"0.12em", color:"#c9963a", marginBottom:6 },
+  h1: { fontFamily:"Georgia,serif", fontSize:18, color:"#faf7f2", fontWeight:900, lineHeight:1.2, marginBottom:10 },
+  searchBox: { background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.2)", borderRadius:6, padding:"8px 10px", display:"flex", alignItems:"center", gap:6, marginBottom:8, cursor:"pointer" },
+  pill: (a) => ({ background:a?"#1c1917":"white", border:`1.5px solid ${a?"#1c1917":"#e2dbd2"}`, color:a?"white":"#78716c", padding:"3px 9px", borderRadius:20, fontSize:9, cursor:"pointer", whiteSpace:"nowrap" }),
+  sectionTitle: { fontFamily:"Georgia,serif", fontSize:13, fontWeight:700, marginBottom:8, color:"#1c1917" },
+  card: { background:"white", border:"1.5px solid #e2dbd2", borderRadius:8, padding:"10px 12px", marginBottom:8, cursor:"pointer", display:"flex", gap:10, alignItems:"center" },
+  badge: (a) => ({ display:"inline-block", fontSize:8, fontFamily:"monospace", textTransform:"uppercase", padding:"2px 6px", borderRadius:3, background:a?"#dcfce7":"#fee2e2", color:a?"#15803d":"#dc2626", marginTop:3 }),
+  btn: (p) => ({ background:p?"#b5451b":"white", color:p?"white":"#1c1917", border:p?"none":"1.5px solid #e2dbd2", borderRadius:6, padding:"10px 14px", fontSize:11, fontWeight:600, cursor:"pointer", textAlign:"center", marginBottom:8, width:"100%", display:"block" }),
+  feedback: { position:"absolute", bottom:60, left:"50%", transform:"translateX(-50%)", background:"#1c1917", color:"white", padding:"8px 16px", borderRadius:20, fontSize:10, whiteSpace:"nowrap", zIndex:100, boxShadow:"0 4px 12px rgba(0,0,0,0.3)" },
+  info: { marginTop:16, maxWidth:320, width:"100%", background:"white", border:"1.5px solid #e2dbd2", borderRadius:8, padding:"12px 14px" },
+};
+
+function BottomNav({ active, go }) {
+  return (
+    <div style={S.bottomNav}>
+      {[["🏠","Home","home"],["🔍","Search","search"],["🔖","Saved","account"],["👤","Account","account"]].map(([icon,label,target]) => (
+        <div key={label} style={S.bnItem(active===label)} onClick={() => go(target)}>
+          <div style={{fontSize:16}}>{icon}</div>
+          <div style={S.bnText(active===label)}>{label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [screen, setScreen] = useState("splash");
+  const [history, setHistory] = useState([]);
+  const [book, setBook] = useState(null);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("All");
+  const [reserved, setReserved] = useState(false);
+  const [anim, setAnim] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+
+  const go = (to, b=null) => {
+    setAnim(true);
+    setTimeout(() => {
+      setHistory(h => [...h, screen]);
+      setScreen(to);
+      if (b) setBook(b);
+      setReserved(false);
+      setAnim(false);
+    }, 200);
+  };
+
+  const back = () => {
+    if (!history.length) return;
+    setAnim(true);
+    setTimeout(() => {
+      const last = history[history.length-1];
+      setHistory(h => h.slice(0,-1));
+      setScreen(last);
+      setAnim(false);
+    }, 200);
+  };
+
+  const toast = (msg) => { setFeedback(msg); setTimeout(() => setFeedback(null), 2000); };
+
+  const filtered = books.filter(b =>
+    (filter==="All" || b.genre===filter || (filter==="Available" && b.available)) &&
+    (b.title.toLowerCase().includes(query.toLowerCase()) || b.author.toLowerCase().includes(query.toLowerCase()))
+  );
+
+  if (screen==="splash") return (
+    <div style={S.wrap}>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={{flex:1,background:"linear-gradient(135deg,#1c1917,#1c3829)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center"}}>
+          <div style={{fontSize:52,marginBottom:12}}>📚</div>
+          <div style={{fontFamily:"Georgia,serif",fontSize:26,color:"#faf7f2",fontWeight:900,marginBottom:6}}>CityLib</div>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#c9963a",textTransform:"uppercase",letterSpacing:"0.16em",marginBottom:32}}>Your Public Library</div>
+          <div style={{background:"#b5451b",color:"white",padding:"12px 32px",borderRadius:30,fontSize:13,fontWeight:600,cursor:"pointer"}} onClick={() => go("home")}>Get Started →</div>
+          <div style={{fontSize:9,color:"#57534e",marginTop:16}}>Tap to explore the prototype</div>
+        </div>
+      </div>
+      <div style={S.info}>
+        <div style={{fontFamily:"monospace",fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"#b5451b",marginBottom:4}}>Prototype Flow</div>
+        <div style={{fontSize:10,color:"#78716c",lineHeight:1.8}}>Splash → Home → Search → Book Detail → Reserve → Confirmation → Account</div>
+        <div style={{fontSize:9,color:"#a8a29e",marginTop:4}}>Tap any element to navigate · All interactions are live</div>
+      </div>
+    </div>
+  );
+
+  if (screen==="home") return (
+    <div style={S.wrap}>
+      <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Screen 1 — Home</div>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={S.screen(anim)}>
+          <div style={S.hero}>
+            <div style={S.eyebrow}>Welcome Back</div>
+            <div style={S.h1}>Find Your Next Great Read</div>
+            <div style={S.searchBox} onClick={() => go("search")}>
+              <span>🔍</span><span style={{fontSize:11,color:"#a8a29e"}}>Search books, authors...</span>
+            </div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {["Fiction","Non-Fiction","Children's","eBooks"].map(t => (
+                <div key={t} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",color:"#a8a29e",padding:"3px 9px",borderRadius:20,fontSize:9,cursor:"pointer"}} onClick={() => { setFilter(t); go("search"); }}>{t}</div>
+              ))}
+            </div>
+          </div>
+          <div style={S.content}>
+            <div style={S.sectionTitle}>Quick Access</div>
+            <div style={{display:"flex",gap:6,marginBottom:12}}>
+              {[["📖","Browse","search"],["🗓️","Events","account"],["💻","Digital","account"],["🎧","Audio","account"]].map(([icon,label,target]) => (
+                <div key={label} style={{flex:1,background:"white",border:"1.5px solid #e2dbd2",borderRadius:6,padding:"10px 4px",textAlign:"center",cursor:"pointer"}} onClick={() => go(target)}>
+                  <div style={{fontSize:18,marginBottom:3}}>{icon}</div>
+                  <div style={{fontSize:9,color:"#78716c"}}>{label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+              <div style={S.sectionTitle}>New Arrivals</div>
+              <div style={{fontSize:9,color:"#b5451b",cursor:"pointer"}} onClick={() => go("search")}>View all →</div>
+            </div>
+            {books.slice(0,3).map(b => (
+              <div key={b.id} style={S.card} onClick={() => go("detail", b)}>
+                <div style={{fontSize:22}}>{b.emoji}</div>
+                <div>
+                  <div style={{fontSize:11,fontWeight:600,color:"#1c1917",marginBottom:2}}>{b.title}</div>
+                  <div style={{fontSize:9.5,color:"#78716c"}}>{b.author} · {b.genre}</div>
+                  <div style={S.badge(b.available)}>{b.available?"Available":"Checked Out"}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <BottomNav active="Home" go={go} />
+        </div>
+        {feedback && <div style={S.feedback}>{feedback}</div>}
+      </div>
+    </div>
+  );
+
+  if (screen==="search") return (
+    <div style={S.wrap}>
+      <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Screen 2 — Search</div>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={S.screen(anim)}>
+          <div style={S.nav}>
+            <div style={S.back} onClick={back}>← Back</div>
+            <div style={S.logo}>Search</div>
+            <div style={{width:40}}></div>
+          </div>
+          <div style={S.content}>
+            <div style={{background:"white",border:"1.5px solid #e2dbd2",borderRadius:6,padding:"8px 10px",display:"flex",gap:6,marginBottom:10}}>
+              <span>🔍</span>
+              <input style={{border:"none",outline:"none",fontSize:11,flex:1,fontFamily:"inherit",color:"#1c1917"}} placeholder="Search by title or author..." value={query} onChange={e => setQuery(e.target.value)} />
+              {query && <span style={{cursor:"pointer",color:"#78716c"}} onClick={() => setQuery("")}>✕</span>}
+            </div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+              {["All","Fiction","Self-Help","Memoir","Sci-Fi","Available"].map(f => (
+                <div key={f} style={S.pill(filter===f)} onClick={() => setFilter(f)}>{f}</div>
+              ))}
+            </div>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>{filtered.length} Results</div>
+            {filtered.length===0 && (
+              <div style={{textAlign:"center",padding:"32px 16px",color:"#78716c"}}>
+                <div style={{fontSize:32,marginBottom:8}}>🔍</div>
+                <div style={{fontSize:11,fontWeight:600,marginBottom:4}}>No results found</div>
+                <div style={{fontSize:10}}>Try a different search term</div>
+              </div>
+            )}
+            {filtered.map(b => (
+              <div key={b.id} style={S.card} onClick={() => go("detail", b)}>
+                <div style={{fontSize:22}}>{b.emoji}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,fontWeight:600,color:"#1c1917",marginBottom:2}}>{b.title}</div>
+                  <div style={{fontSize:9.5,color:"#78716c"}}>{b.author} · {b.genre}</div>
+                  <div style={S.badge(b.available)}>{b.available?"Available":"Checked Out"}</div>
+                </div>
+                <div style={{fontSize:10,color:"#b5451b"}}>›</div>
+              </div>
+            ))}
+          </div>
+          <BottomNav active="Search" go={go} />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (screen==="detail" && book) return (
+    <div style={S.wrap}>
+      <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Screen 3 — Book Detail</div>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={S.screen(anim)}>
+          <div style={S.nav}>
+            <div style={S.back} onClick={back}>← Back</div>
+            <div style={S.logo}>Book Detail</div>
+            <div style={{fontSize:14,cursor:"pointer"}} onClick={() => toast("Added to reading list! 🔖")}>🔖</div>
+          </div>
+          <div style={S.content}>
+            <div style={{background:`linear-gradient(135deg,${book.cover},#1c1917)`,borderRadius:10,height:90,display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,marginBottom:10}}>{book.emoji}</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:16,fontWeight:700,marginBottom:4,color:"#1c1917"}}>{book.title}</div>
+            <div style={{fontSize:10,color:"#78716c",marginBottom:8}}>{book.author} · {book.genre} · 2023</div>
+            <div style={S.badge(book.available)}>{book.available?"✓ Available Now":`✗ Checked Out · Due ${book.due}`}</div>
+            <div style={{fontSize:10,color:"#78716c",lineHeight:1.7,margin:"12px 0"}}>A beautifully written novel that explores the infinite possibilities of life. A must-read that has captivated readers worldwide with its unique storytelling.</div>
+            <div style={{display:"flex",gap:8,marginBottom:12}}>
+              {[["⭐","4.5 Rating"],["📄","304 Pages"],["🌍","English"]].map(([icon,label]) => (
+                <div key={label} style={{flex:1,background:"#f7f3ee",borderRadius:6,padding:"7px 4px",textAlign:"center"}}>
+                  <div style={{fontSize:12}}>{icon}</div>
+                  <div style={{fontSize:8,color:"#78716c",marginTop:2}}>{label}</div>
+                </div>
+              ))}
+            </div>
+            {book.available
+              ? <div style={S.btn(true)} onClick={() => go("reserve", book)}>Reserve This Book</div>
+              : <div style={{...S.btn(false),opacity:0.6}} onClick={() => toast("Added to waitlist! You'll be notified when available.")}>Join Waitlist</div>
+            }
+            <div style={S.btn(false)} onClick={() => toast("Added to reading list! 🔖")}>+ Add to Reading List</div>
+          </div>
+          <BottomNav active="Search" go={go} />
+        </div>
+        {feedback && <div style={S.feedback}>{feedback}</div>}
+      </div>
+    </div>
+  );
+
+  if (screen==="reserve" && book) return (
+    <div style={S.wrap}>
+      <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Screen 4 — Reserve</div>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={S.screen(anim)}>
+          <div style={S.nav}>
+            <div style={S.back} onClick={back}>← Back</div>
+            <div style={S.logo}>Reserve</div>
+            <div style={{width:40}}></div>
+          </div>
+          <div style={S.content}>
+            {!reserved ? (
+              <>
+                <div style={{background:"#f0faf4",border:"1.5px solid #86efac",borderRadius:8,padding:"12px",marginBottom:12,textAlign:"center"}}>
+                  <div style={{fontSize:24,marginBottom:4}}>✅</div>
+                  <div style={{fontSize:11,fontWeight:600,color:"#15803d",marginBottom:2}}>This book is available!</div>
+                  <div style={{fontSize:9,color:"#16a34a"}}>Ready for pickup at City Library</div>
+                </div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:13,fontWeight:700,marginBottom:12,color:"#1c1917"}}>Reservation Details</div>
+                {[["📚","Book",book.title],["👤","Borrower","Sarah Johnson"],["📍","Branch","City Centre Library"],["📅","Pickup By","2 Jun 2025"],["⏱️","Loan Period","3 Weeks"]].map(([icon,label,val]) => (
+                  <div key={label} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:"1px solid #f0ece6"}}>
+                    <span style={{fontSize:14}}>{icon}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:9,color:"#78716c",fontFamily:"monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>{label}</div>
+                      <div style={{fontSize:11,color:"#1c1917",fontWeight:500}}>{val}</div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{...S.btn(true),marginTop:16}} onClick={() => setReserved(true)}>Confirm Reservation</div>
+                <div style={S.btn(false)} onClick={back}>Cancel</div>
+              </>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",paddingTop:40}}>
+                <div style={{fontSize:52,marginBottom:12}}>🎉</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,color:"#1c1917",marginBottom:8}}>Reserved!</div>
+                <div style={{fontSize:10,color:"#78716c",lineHeight:1.7,marginBottom:24,maxWidth:220}}>Your book has been reserved. Pick it up at City Centre Library by 2 Jun 2025.</div>
+                <div style={{background:"#f0faf4",border:"1.5px solid #86efac",borderRadius:8,padding:"12px 20px",marginBottom:20}}>
+                  <div style={{fontFamily:"monospace",fontSize:9,color:"#15803d",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>Confirmation Code</div>
+                  <div style={{fontFamily:"monospace",fontSize:18,fontWeight:700,color:"#1c1917",letterSpacing:"0.2em"}}>LIB-4821</div>
+                </div>
+                <div style={{...S.btn(true),width:200}} onClick={() => go("home")}>Back to Home</div>
+                <div style={{...S.btn(false),width:200}} onClick={() => go("account")}>View My Books</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (screen==="account") return (
+    <div style={S.wrap}>
+      <div style={{fontFamily:"monospace",fontSize:9,color:"#78716c",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Screen 5 — Account</div>
+      <div style={S.phone}>
+        <div style={S.notch}><div style={S.notchBar}></div></div>
+        <div style={S.screen(anim)}>
+          <div style={S.nav}>
+            <div style={{width:40}}></div>
+            <div style={S.logo}>My Account</div>
+            <div style={{fontSize:12,color:"#a8a29e",cursor:"pointer"}} onClick={() => toast("Settings coming soon!")}>⚙️</div>
+          </div>
+          <div style={S.content}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+              <div style={{width:44,height:44,background:"#b5451b",borderRadius:22,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>👤</div>
+              <div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:14,fontWeight:700,color:"#1c1917"}}>Sarah Johnson</div>
+                <div style={{fontSize:9,color:"#78716c"}}>Member since 2019 · Gold Card</div>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8,marginBottom:12}}>
+              {[["3","Checked Out"],["2","Reserved"],["12","Reading List"],["47","All Time"]].map(([num,lbl]) => (
+                <div key={lbl} style={{flex:1,background:"white",border:"1.5px solid #e2dbd2",borderRadius:6,padding:"8px 4px",textAlign:"center"}}>
+                  <div style={{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,color:"#1c1917"}}>{num}</div>
+                  <div style={{fontSize:8,color:"#78716c",marginTop:2}}>{lbl}</div>
+                </div>
+              ))}
+            </div>
+            <div style={S.sectionTitle}>Currently Borrowed</div>
+            {[{emoji:"📘",title:"The Midnight Library",due:"15 Jun"},{emoji:"📗",title:"Atomic Habits",due:"20 Jun"},{emoji:"📕",title:"Educated",due:"25 Jun"}].map(b => (
+              <div key={b.title} style={{...S.card,cursor:"default"}}>
+                <div style={{fontSize:22}}>{b.emoji}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,fontWeight:600,color:"#1c1917",marginBottom:2}}>{b.title}</div>
+                  <div style={{fontSize:9.5,color:"#78716c"}}>Due: {b.due} 2025</div>
+                </div>
+                <div style={{fontSize:9,color:"#b5451b",cursor:"pointer"}} onClick={() => toast("Renewal requested! ✓")}>Renew</div>
+              </div>
+            ))}
+          </div>
+          <BottomNav active="Account" go={go} />
+        </div>
+        {feedback && <div style={S.feedback}>{feedback}</div>}
+      </div>
+    </div>
+  );
+
+  return null;
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
