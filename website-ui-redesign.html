@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Library — Website UI Redesign</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #f7f3ee;
+  --ink: #1c1917;
+  --cream: #faf7f2;
+  --accent: #b5451b;
+  --accent2: #2d6a4f;
+  --gold: #c9963a;
+  --muted: #78716c;
+  --border: #e2dbd2;
+  --white: #ffffff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); font-family: 'Outfit', sans-serif; color: var(--ink); }
+
+/* ── HEADER ── */
+.main-header {
+  background: var(--ink);
+  padding: 32px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 4px solid var(--accent);
+}
+.main-header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+  color: var(--cream);
+  font-weight: 900;
+}
+.main-header .meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: #a8a29e;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.8;
+}
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  background: var(--ink);
+  display: flex;
+  gap: 0;
+  padding: 0 60px;
+  border-bottom: 1px solid #2a2522;
+}
+.nav-tab {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #78716c;
+  padding: 14px 20px;
+  border-bottom: 3px solid transparent;
+  cursor: default;
+}
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── PAGE SECTIONS ── */
+.page { max-width: 1300px; margin: 0 auto; padding: 48px 60px; }
+
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.section-heading {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: var(--ink);
+}
+
+.divider { border: none; border-top: 1.5px solid var(--border); margin: 52px 0; }
+
+/* ══════════════════════════
+   PART 1 — HEURISTIC EVAL
+══════════════════════════ */
+.heuristic-intro {
+  background: white;
+  border: 1.5px solid var(--border);
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+.hi-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.hi-value {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.hi-block { flex: 1; }
+
+.heuristic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.h-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.h-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+}
+.h-card.high::before { background: #dc2626; }
+.h-card.medium::before { background: var(--gold); }
+.h-card.low::before { background: var(--accent2); }
+
+.h-severity {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.h-severity.high { color: #dc2626; }
+.h-severity.medium { color: var(--gold); }
+.h-severity.low { color: var(--accent2); }
+
+.h-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.h-card p {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.h-fix {
+  font-size: 0.73rem;
+  color: var(--accent2);
+  font-weight: 500;
+  padding: 6px 10px;
+  background: #f0faf4;
+  border-left: 2px solid var(--accent2);
+}
+
+/* ══════════════════════════
+   PART 2 — MOOD BOARD
+══════════════════════════ */
+.moodboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 200px 200px;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+.mood-tile {
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  font-family: 'Fraunces', serif;
+  font-size: 0.85rem;
+  color: white;
+  font-style: italic;
+  position: relative;
+  overflow: hidden;
+}
+.mood-tile.span2 { grid-row: span 2; }
+.mood-tile-1 { background: linear-gradient(135deg, #1c1917 0%, #44403c 100%); }
+.mood-tile-2 { background: linear-gradient(135deg, #b5451b 0%, #c4622d 100%); }
+.mood-tile-3 { background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%); }
+.mood-tile-4 { background: linear-gradient(135deg, #c9963a 0%, #d4a849 100%); }
+.mood-tile-5 {
+  background: #f7f3ee;
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+.mood-tile-5 span { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.mood-tile-bg {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 5rem;
+  opacity: 0.08;
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Style guide */
+.style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.style-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  padding: 24px;
+}
+.style-card h3 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* Color swatches */
+.swatch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch {
+  width: 48px; height: 48px;
+  border-radius: 4px;
+  position: relative;
+  cursor: default;
+}
+.swatch-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Typography */
+.type-sample { margin-bottom: 14px; }
+.type-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+/* Spacing */
+.spacing-row { display: flex; flex-direction: column; gap: 10px; }
+.spacing-item { display: flex; align-items: center; gap: 12px; }
+.spacing-bar { height: 8px; background: var(--accent); border-radius: 2px; }
+.spacing-val { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); white-space: nowrap; }
+
+/* ══════════════════════════
+   PART 3 — DESKTOP MOCKUP
+══════════════════════════ */
+.browser-frame {
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 6px 6px 0 var(--ink);
+  margin-bottom: 40px;
+}
+.browser-bar {
+  background: #f1ece6;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1.5px solid var(--border);
+}
+.browser-dots { display: flex; gap: 6px; }
+.b-dot { width: 11px; height: 11px; border-radius: 50%; }
+.b-dot.red { background: #ff5f57; }
+.b-dot.yellow { background: #ffbd2e; }
+.b-dot.green { background: #28c840; }
+.browser-url {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+/* Website inside browser */
+.site-nav {
+  background: var(--ink);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+}
+.site-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  color: var(--cream);
+  font-weight: 700;
+  margin-right: auto;
+}
+.site-nav-link {
+  font-size: 0.75rem;
+  color: #a8a29e;
+  letter-spacing: 0.05em;
+}
+.site-nav-cta {
+  background: var(--accent);
+  color: white;
+  padding: 7px 18px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+/* Hero */
+.site-hero {
+  background: linear-gradient(135deg, #1c1917 0%, #292524 60%, #1c3829 100%);
+  padding: 60px 40px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+.hero-text { flex: 1; }
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.hero-h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--cream);
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.hero-sub {
+  font-size: 0.85rem;
+  color: #a8a29e;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 400px;
+}
+.hero-btns { display: flex; gap: 12px; }
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  padding: 11px 24px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.btn-secondary {
+  border: 1.5px solid #57534e;
+  color: var(--cream);
+  padding: 11px 24px;
+  font-size: 0.78rem;
+  border-radius: 4px;
+}
+.hero-search {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 20px;
+}
+.search-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.search-box {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.search-box span { color: #a8a29e; font-size: 0.78rem; }
+.search-icon { color: var(--gold); font-size: 0.9rem; }
+.search-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.s-tag {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #a8a29e;
+  padding: 3px 10px;
+  font-size: 0.62rem;
+  border-radius: 20px;
+}
+
+/* Features row */
+.site-features {
+  background: var(--cream);
+  padding: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--border);
+}
+.feat-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  padding: 20px;
+  border-radius: 6px;
+}
+.feat-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+.feat-title {
+  font-family: 'Fraunces', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.feat-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
+
+/* Books section */
+.site-books {
+  background: white;
+  padding: 40px;
+  border-top: 1px solid var(--border);
+}
+.books-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.books-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.books-link { font-size: 0.72rem; color: var(--accent); }
+.books-row { display: flex; gap: 16px; }
+.book-card {
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.book-cover {
+  height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+}
+.book-info { padding: 10px; }
+.book-title { font-size: 0.72rem; font-weight: 600; margin-bottom: 3px; }
+.book-author { font-size: 0.62rem; color: var(--muted); }
+.book-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.55rem;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.badge-available { background: #dcfce7; color: #15803d; }
+.badge-checked { background: #fee2e2; color: #dc2626; }
+
+/* Footer */
+.site-footer {
+  background: var(--ink);
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 3px solid var(--accent);
+}
+.footer-logo { font-family: 'Fraunces', serif; font-size: 0.9rem; color: var(--cream); font-weight: 700; }
+.footer-links { display: flex; gap: 20px; }
+.footer-link { font-size: 0.7rem; color: #78716c; }
+.footer-copy { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #57534e; }
+
+/* ══════════════════════════
+   PART 4 — MOBILE MOCKUP
+══════════════════════════ */
+.mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.mobile-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.mobile-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.mobile-name {
+  font-family: 'Fraunces', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.phone2 {
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 9/19.5;
+  background: var(--cream);
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.phone2::before {
+  content: '';
+  position: absolute;
+  top: 9px; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 5px;
+  background: var(--ink);
+  border-radius: 3px;
+  z-index: 10;
+}
+.phone2-inner {
+  position: absolute;
+  inset: 20px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile components */
+.m-nav {
+  background: var(--ink);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.m-logo { font-family: 'Fraunces', serif; font-size: 8px; color: var(--cream); font-weight: 700; }
+.m-hamburger { display: flex; flex-direction: column; gap: 2px; }
+.m-line { width: 14px; height: 1.5px; background: var(--cream); }
+
+.m-hero {
+  background: linear-gradient(135deg, #1c1917, #1c3829);
+  padding: 14px 12px;
+  flex-shrink: 0;
+}
+.m-hero-tag { font-family: 'DM Mono', monospace; font-size: 5px; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+.m-hero-h1 { font-family: 'Fraunces', serif; font-size: 11px; color: var(--cream); font-weight: 900; line-height: 1.3; margin-bottom: 8px; }
+.m-search { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 6px 8px; font-size: 6px; color: #a8a29e; margin-bottom: 8px; }
+.m-btn { background: var(--accent); color: white; padding: 5px 12px; font-size: 6px; font-weight: 600; border-radius: 3px; display: inline-block; }
+
+.m-content { flex: 1; padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+.m-section-title { font-family: 'Fraunces', serif; font-size: 8px; font-weight: 700; margin-bottom: 2px; }
+.m-card { background: white; border: 1px solid var(--border); border-radius: 4px; padding: 8px; }
+.m-card-title { font-size: 6.5px; font-weight: 600; margin-bottom: 2px; }
+.m-card-sub { font-size: 5.5px; color: var(--muted); }
+.m-row { display: flex; gap: 6px; }
+.m-feat { flex: 1; background: white; border: 1px solid var(--border); border-radius: 4px; padding: 7px; text-align: center; }
+.m-feat-icon { font-size: 10px; margin-bottom: 3px; }
+.m-feat-text { font-size: 5.5px; color: var(--muted); }
+
+.m-bottom-nav {
+  height: 36px;
+  background: white;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-shrink: 0;
+}
+.m-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.m-nav-icon { font-size: 10px; }
+.m-nav-text { font-size: 4.5px; color: var(--muted); }
+.m-nav-text.active { color: var(--accent); }
+
+/* Responsive note */
+.responsive-note {
+  background: white;
+  border: 1.5px solid var(--border);
+  padding: 24px 32px;
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.rn-item h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.rn-item p { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+.rn-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent2);
+  background: #f0faf4;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  padding: 24px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 3px solid var(--accent);
+}
+footer span { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: #78716c; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="main-header">
+  <div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:#78716c;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px;">UI/UX Design Project</div>
+    <h1>City Library — Website UI Redesign</h1>
+  </div>
+  <div class="meta">
+    Project Type: Website Redesign<br>
+    Deliverables: Heuristic Eval · Mood Board · Hi-Fi Mockups<br>
+    Responsive: Desktop + Mobile
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active">01 Heuristic Evaluation</div>
+  <div class="nav-tab">02 Mood Board & Style Guide</div>
+  <div class="nav-tab">03 Desktop Mockup</div>
+  <div class="nav-tab">04 Mobile Mockup</div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════
+       PART 1 — HEURISTIC EVALUATION
+  ══════════════════════════════ -->
+  <div class="section-eyebrow">Part 01 — Heuristic Evaluation</div>
+  <div class="section-heading">Usability Issues Found in Existing Site</div>
+
+  <div class="heuristic-intro">
+    <div class="hi-block">
+      <div class="hi-label">Website Evaluated</div>
+      <div class="hi-value">City Public Library (existing site)</div>
+    </div>
+    <div class="hi-block">
+      <div class="hi-label">Evaluation Method</div>
+      <div class="hi-value">Nielsen's 10 Usability Heuristics</div>
+    </div>
+    <div class="hi-block">
+      <div class="hi-label">Issues Found</div>
+      <div class="hi-value">9 Issues (3 High · 4 Medium · 2 Low)</div>
+    </div>
+    <div class="hi-block">
+      <div class="hi-label">Evaluators</div>
+      <div class="hi-value">UX Design Team · 2025</div>
+    </div>
+  </div>
+
+  <div class="heuristic-grid">
+    <div class="h-card high">
+      <div class="h-severity high">● High Severity</div>
+      <h3>No Clear Visual Hierarchy</h3>
+      <p>All text appears in the same size and weight. Users cannot distinguish headings from body text, making it impossible to scan content quickly.</p>
+      <div class="h-fix">Fix: Establish a clear type scale with distinct heading sizes</div>
+    </div>
+    <div class="h-card high">
+      <div class="h-severity high">● High Severity</div>
+      <h3>Search is Buried & Unclear</h3>
+      <p>The book search function is hidden on a secondary page. Users expect search to be the primary action but cannot find it on the homepage.</p>
+      <div class="h-fix">Fix: Place a prominent search bar as the hero element</div>
+    </div>
+    <div class="h-card high">
+      <div class="h-severity high">● High Severity</div>
+      <h3>Not Mobile Responsive</h3>
+      <p>The website breaks on screens smaller than 1024px. Text overflows, buttons become unclickable, and images get cropped incorrectly.</p>
+      <div class="h-fix">Fix: Rebuild using a mobile-first responsive layout</div>
+    </div>
+    <div class="h-card medium">
+      <div class="h-severity medium">● Medium Severity</div>
+      <h3>Poor Colour Contrast</h3>
+      <p>Light grey text on white background fails WCAG AA contrast requirements. Users with visual impairments cannot read key content.</p>
+      <div class="h-fix">Fix: Ensure minimum 4.5:1 contrast ratio for all text</div>
+    </div>
+    <div class="h-card medium">
+      <div class="h-severity medium">● Medium Severity</div>
+      <h3>Inconsistent Navigation</h3>
+      <p>The navigation menu changes structure between pages. Some pages show 6 items, others show 9, with different ordering each time.</p>
+      <div class="h-fix">Fix: Create a consistent global navigation component</div>
+    </div>
+    <div class="h-card medium">
+      <div class="h-severity medium">● Medium Severity</div>
+      <h3>No Feedback on Actions</h3>
+      <p>When users reserve a book, no confirmation message appears. They are left unsure whether their action was successful.</p>
+      <div class="h-fix">Fix: Add success/error states and confirmation messages</div>
+    </div>
+    <div class="h-card medium">
+      <div class="h-severity medium">● Medium Severity</div>
+      <h3>Cluttered Homepage</h3>
+      <p>The homepage contains 14 different sections with no clear priority. Users experience decision fatigue and leave without completing tasks.</p>
+      <div class="h-fix">Fix: Reduce to 4–5 focused sections with clear purpose</div>
+    </div>
+    <div class="h-card low">
+      <div class="h-severity low">● Low Severity</div>
+      <h3>Outdated Typography</h3>
+      <p>The site uses Times New Roman throughout, which feels dated and reduces perceived credibility of the institution.</p>
+      <div class="h-fix">Fix: Adopt a modern, readable typeface system</div>
+    </div>
+    <div class="h-card low">
+      <div class="h-severity low">● Low Severity</div>
+      <h3>Missing Empty States</h3>
+      <p>When a book search returns no results, a blank white page appears with no guidance on what to do next.</p>
+      <div class="h-fix">Fix: Design helpful empty states with suggested actions</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════
+       PART 2 — MOOD BOARD & STYLE GUIDE
+  ══════════════════════════════ -->
+  <div class="section-eyebrow">Part 02 — Mood Board & Style Guide</div>
+  <div class="section-heading">Visual Direction & Design Tokens</div>
+
+  <!-- Mood board -->
+  <div style="font-family:'DM Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:12px;">Mood Board — Refined, Warm, Trustworthy</div>
+  <div class="moodboard-grid">
+    <div class="mood-tile mood-tile-1 span2">
+      <div class="mood-tile-bg">Knowledge</div>
+      <span>Dark, authoritative backgrounds — a sense of depth and gravitas</span>
+    </div>
+    <div class="mood-tile mood-tile-2">
+      <div class="mood-tile-bg">Fire</div>
+      <span>Warm terracotta accents — approachable energy</span>
+    </div>
+    <div class="mood-tile mood-tile-3">
+      <div class="mood-tile-bg">Forest</div>
+      <span>Forest green — calm, nature, growth</span>
+    </div>
+    <div class="mood-tile mood-tile-4">
+      <div class="mood-tile-bg">Gold</div>
+      <span>Gold highlights — prestige and warmth</span>
+    </div>
+    <div class="mood-tile mood-tile-5">
+      <span style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;color:var(--ink);">Aa</span>
+      <span>Fraunces — editorial serif</span>
+      <span>Outfit — clean sans-serif</span>
+    </div>
+  </div>
+
+  <!-- Style Guide -->
+  <div style="font-family:'DM Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:12px;">Style Guide</div>
+  <div class="style-grid">
+
+    <!-- Colors -->
+    <div class="style-card">
+      <h3>Color Palette</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div class="swatch-row">
+            <div>
+              <div class="swatch" style="background:#1c1917;"></div>
+              <div class="swatch-label">Ink</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#b5451b;"></div>
+              <div class="swatch-label">Accent</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#2d6a4f;"></div>
+              <div class="swatch-label">Green</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#c9963a;"></div>
+              <div class="swatch-label">Gold</div>
+            </div>
+            <div>
+              <div class="swatch" style="background:#f7f3ee;border:1px solid #e2dbd2;"></div>
+              <div class="swatch-label">Bg</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--muted);line-height:1.6;">Warm neutrals as base, terracotta as primary CTA color, green for success states, gold for highlights.</p>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="style-card">
+      <h3>Typography Scale</h3>
+      <div class="type-sample">
+        <div class="type-label">Display / H1</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:900;line-height:1.1;">Find Your Next Book</div>
+      </div>
+      <div class="type-sample">
+        <div class="type-label">Heading / H2</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;">New Arrivals</div>
+      </div>
+      <div class="type-sample">
+        <div class="type-label">Body Text</div>
+        <div style="font-size:0.82rem;color:var(--muted);line-height:1.6;">Discover thousands of books available to borrow for free.</div>
+      </div>
+      <div class="type-sample">
+        <div class="type-label">Label / Mono</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:var(--accent);">AVAILABLE NOW</div>
+      </div>
+    </div>
+
+    <!-- Spacing & Components -->
+    <div class="style-card">
+      <h3>Spacing System</h3>
+      <div class="spacing-row">
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:8px;"></div>
+          <div class="spacing-val">4px — XS</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:16px;"></div>
+          <div class="spacing-val">8px — SM</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:32px;"></div>
+          <div class="spacing-val">16px — MD</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:48px;"></div>
+          <div class="spacing-val">24px — LG</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:64px;"></div>
+          <div class="spacing-val">32px — XL</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-bar" style="width:96px;"></div>
+          <div class="spacing-val">48px — 2XL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════
+       PART 3 — DESKTOP MOCKUP
+  ══════════════════════════════ -->
+  <div class="section-eyebrow">Part 03 — High-Fidelity Desktop Mockup</div>
+  <div class="section-heading">Redesigned Website — Desktop View</div>
+
+  <div class="browser-frame">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <div class="b-dot red"></div>
+        <div class="b-dot yellow"></div>
+        <div class="b-dot green"></div>
+      </div>
+      <div class="browser-url">🔒 citylibrary.gov/home</div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="site-nav">
+      <div class="site-logo">📚 CityLib</div>
+      <div class="site-nav-link">Catalogue</div>
+      <div class="site-nav-link">Events</div>
+      <div class="site-nav-link">Membership</div>
+      <div class="site-nav-link">Branches</div>
+      <div class="site-nav-link">About</div>
+      <div class="site-nav-cta">My Account</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="site-hero">
+      <div class="hero-text">
+        <div class="hero-eyebrow">Welcome to CityLib</div>
+        <div class="hero-h1">Your Gateway to<br>Infinite Knowledge</div>
+        <div class="hero-sub">Access over 200,000 books, digital resources, and community events — all free with your library membership.</div>
+        <div class="hero-btns">
+          <div class="btn-primary">Browse Catalogue</div>
+          <div class="btn-secondary">Get a Card</div>
+        </div>
+      </div>
+      <div class="hero-search">
+        <div class="search-label">Search the Catalogue</div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <span>Search by title, author, or ISBN...</span>
+        </div>
+        <div class="search-tags">
+          <div class="s-tag">Fiction</div>
+          <div class="s-tag">Non-fiction</div>
+          <div class="s-tag">Children's</div>
+          <div class="s-tag">eBooks</div>
+          <div class="s-tag">Audiobooks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="site-features">
+      <div class="feat-card">
+        <div class="feat-icon">📖</div>
+        <div class="feat-title">200K+ Books</div>
+        <div class="feat-desc">Physical and digital titles across every genre and subject area.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎧</div>
+        <div class="feat-title">Audiobooks</div>
+        <div class="feat-desc">Listen on the go with our free audiobook streaming service.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🗓️</div>
+        <div class="feat-title">Events</div>
+        <div class="feat-desc">Weekly workshops, reading clubs, and community programs.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💻</div>
+        <div class="feat-title">Digital Access</div>
+        <div class="feat-desc">Online databases, e-learning platforms, and research tools.</div>
+      </div>
+    </div>
+
+    <!-- Books section -->
+    <div class="site-books">
+      <div class="books-header">
+        <div class="books-title">New Arrivals This Week</div>
+        <div class="books-link">View all →</div>
+      </div>
+      <div class="books-row">
+        <div class="book-card">
+          <div class="book-cover" style="background:#fef3c7;">📘</div>
+          <div class="book-info">
+            <div class="book-title">The Midnight Library</div>
+            <div class="book-author">Matt Haig</div>
+            <div class="book-badge badge-available">Available</div>
+          </div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover" style="background:#dbeafe;">📗</div>
+          <div class="book-info">
+            <div class="book-title">Atomic Habits</div>
+            <div class="book-author">James Clear</div>
+            <div class="book-badge badge-checked">Checked Out</div>
+          </div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover" style="background:#fce7f3;">📕</div>
+          <div class="book-info">
+            <div class="book-title">Educated</div>
+            <div class="book-author">Tara Westover</div>
+            <div class="book-badge badge-available">Available</div>
+          </div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover" style="background:#dcfce7;">📙</div>
+          <div class="book-info">
+            <div class="book-title">Project Hail Mary</div>
+            <div class="book-author">Andy Weir</div>
+            <div class="book-badge badge-available">Available</div>
+          </div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover" style="background:#ede9fe;">📓</div>
+          <div class="book-info">
+            <div class="book-title">Klara and the Sun</div>
+            <div class="book-author">Kazuo Ishiguro</div>
+            <div class="book-badge badge-checked">Checked Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="site-footer">
+      <div class="footer-logo">📚 CityLib</div>
+      <div class="footer-links">
+        <div class="footer-link">Privacy Policy</div>
+        <div class="footer-link">Accessibility</div>
+        <div class="footer-link">Contact Us</div>
+        <div class="footer-link">Sitemap</div>
+      </div>
+      <div class="footer-copy">© 2025 City Public Library. All rights reserved.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════
+       PART 4 — MOBILE MOCKUP
+  ══════════════════════════════ -->
+  <div class="section-eyebrow">Part 04 — Mobile Responsive Mockup</div>
+  <div class="section-heading">Redesigned Website — Mobile View</div>
+
+  <div class="mobile-grid">
+
+    <!-- Mobile Screen 1: Home -->
+    <div class="mobile-wrap">
+      <div class="mobile-label">Screen 01</div>
+      <div class="phone2">
+        <div class="phone2-inner">
+          <div class="m-nav">
+            <div class="m-logo">📚 CityLib</div>
+            <div class="m-hamburger">
+              <div class="m-line"></div>
+              <div class="m-line"></div>
+              <div class="m-line"></div>
+            </div>
+          </div>
+          <div class="m-hero">
+            <div class="m-hero-tag">Welcome</div>
+            <div class="m-hero-h1">Your Gateway to Infinite Knowledge</div>
+            <div class="m-search">🔍 Search books, authors...</div>
+            <div class="m-btn">Browse Catalogue</div>
+          </div>
+          <div class="m-content">
+            <div class="m-section-title">Quick Access</div>
+            <div class="m-row">
+              <div class="m-feat">
+                <div class="m-feat-icon">📖</div>
+                <div class="m-feat-text">Books</div>
+              </div>
+              <div class="m-feat">
+                <div class="m-feat-icon">🎧</div>
+                <div class="m-feat-text">Audio</div>
+              </div>
+              <div class="m-feat">
+                <div class="m-feat-icon">🗓️</div>
+                <div class="m-feat-text">Events</div>
+              </div>
+            </div>
+            <div class="m-section-title">New Arrivals</div>
+            <div class="m-card">
+              <div class="m-card-title">📘 The Midnight Library</div>
+              <div class="m-card-sub">Matt Haig · Available</div>
+            </div>
+            <div class="m-card">
+              <div class="m-card-title">📗 Atomic Habits</div>
+              <div class="m-card-sub">James Clear · Checked Out</div>
+            </div>
+          </div>
+          <div class="m-bottom-nav">
+            <div class="m-nav-item"><div class="m-nav-icon">🏠</div><div class="m-nav-text active">Home</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔍</div><div class="m-nav-text">Search</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔖</div><div class="m-nav-text">Saved</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">👤</div><div class="m-nav-text">Account</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-name">Home</div>
+    </div>
+
+    <!-- Mobile Screen 2: Search -->
+    <div class="mobile-wrap">
+      <div class="mobile-label">Screen 02</div>
+      <div class="phone2">
+        <div class="phone2-inner">
+          <div class="m-nav">
+            <div class="m-logo">📚 CityLib</div>
+          </div>
+          <div class="m-content" style="padding-top:14px;">
+            <div class="m-section-title">Search Catalogue</div>
+            <div class="m-search" style="background:white;border:1px solid var(--border);">🔍 Search by title or author...</div>
+            <div style="font-family:'DM Mono',monospace;font-size:5.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Filter by</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+              <div style="background:var(--ink);color:white;padding:2px 7px;border-radius:10px;font-size:5.5px;">All</div>
+              <div style="background:white;border:1px solid var(--border);padding:2px 7px;border-radius:10px;font-size:5.5px;">Fiction</div>
+              <div style="background:white;border:1px solid var(--border);padding:2px 7px;border-radius:10px;font-size:5.5px;">Non-Fiction</div>
+              <div style="background:white;border:1px solid var(--border);padding:2px 7px;border-radius:10px;font-size:5.5px;">eBook</div>
+            </div>
+            <div class="m-section-title">Results (4)</div>
+            <div class="m-card">
+              <div class="m-card-title">📘 The Midnight Library</div>
+              <div class="m-card-sub">Matt Haig · Fiction · Available</div>
+            </div>
+            <div class="m-card">
+              <div class="m-card-title">📗 Atomic Habits</div>
+              <div class="m-card-sub">James Clear · Self-Help · Checked Out</div>
+            </div>
+            <div class="m-card">
+              <div class="m-card-title">📕 Educated</div>
+              <div class="m-card-sub">Tara Westover · Memoir · Available</div>
+            </div>
+          </div>
+          <div class="m-bottom-nav">
+            <div class="m-nav-item"><div class="m-nav-icon">🏠</div><div class="m-nav-text">Home</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔍</div><div class="m-nav-text active">Search</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔖</div><div class="m-nav-text">Saved</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">👤</div><div class="m-nav-text">Account</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-name">Search</div>
+    </div>
+
+    <!-- Mobile Screen 3: Book Detail -->
+    <div class="mobile-wrap">
+      <div class="mobile-label">Screen 03</div>
+      <div class="phone2">
+        <div class="phone2-inner">
+          <div class="m-nav">
+            <div style="font-size:8px;color:var(--cream);">← Back</div>
+            <div class="m-logo">Book Detail</div>
+            <div style="font-size:8px;color:var(--cream);">🔖</div>
+          </div>
+          <div class="m-content" style="padding-top:12px;">
+            <div style="background:linear-gradient(135deg,#1c1917,#2d6a4f);border-radius:6px;height:60px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:4px;">📘</div>
+            <div style="font-family:'Fraunces',serif;font-size:10px;font-weight:700;text-align:center;">The Midnight Library</div>
+            <div style="font-size:6px;color:var(--muted);text-align:center;margin-bottom:8px;">Matt Haig · Fiction · 2020</div>
+            <div style="background:#dcfce7;color:#15803d;padding:4px 10px;border-radius:10px;font-size:5.5px;font-family:'DM Mono',monospace;text-align:center;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Available Now</div>
+            <div style="font-size:6px;color:var(--muted);line-height:1.6;margin-bottom:8px;">Between life and death there is a library, and within that library, the shelves go on forever...</div>
+            <div style="background:var(--accent);color:white;padding:7px;border-radius:4px;font-size:6.5px;font-weight:600;text-align:center;margin-bottom:6px;">Reserve This Book</div>
+            <div style="background:white;border:1px solid var(--border);padding:7px;border-radius:4px;font-size:6.5px;text-align:center;">Add to Reading List</div>
+          </div>
+          <div class="m-bottom-nav">
+            <div class="m-nav-item"><div class="m-nav-icon">🏠</div><div class="m-nav-text">Home</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔍</div><div class="m-nav-text active">Search</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔖</div><div class="m-nav-text">Saved</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">👤</div><div class="m-nav-text">Account</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-name">Book Detail</div>
+    </div>
+
+    <!-- Mobile Screen 4: Account -->
+    <div class="mobile-wrap">
+      <div class="mobile-label">Screen 04</div>
+      <div class="phone2">
+        <div class="phone2-inner">
+          <div class="m-nav">
+            <div class="m-logo">My Account</div>
+          </div>
+          <div class="m-content" style="padding-top:12px;align-items:center;">
+            <div style="width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>
+            <div style="font-family:'Fraunces',serif;font-size:9px;font-weight:700;">Sarah Johnson</div>
+            <div style="font-size:5.5px;color:var(--muted);margin-bottom:8px;">Member since 2019</div>
+            <div style="width:100%;display:flex;gap:6px;margin-bottom:8px;">
+              <div style="flex:1;background:white;border:1px solid var(--border);border-radius:4px;padding:7px;text-align:center;">
+                <div style="font-family:'Fraunces',serif;font-size:11px;font-weight:700;">3</div>
+                <div style="font-size:5px;color:var(--muted);">Checked Out</div>
+              </div>
+              <div style="flex:1;background:white;border:1px solid var(--border);border-radius:4px;padding:7px;text-align:center;">
+                <div style="font-family:'Fraunces',serif;font-size:11px;font-weight:700;">2</div>
+                <div style="font-size:5px;color:var(--muted);">Reserved</div>
+              </div>
+              <div style="flex:1;background:white;border:1px solid var(--border);border-radius:4px;padding:7px;text-align:center;">
+                <div style="font-family:'Fraunces',serif;font-size:11px;font-weight:700;">12</div>
+                <div style="font-size:5px;color:var(--muted);">Reading List</div>
+              </div>
+            </div>
+            <div class="m-section-title" style="align-self:flex-start;">Currently Borrowed</div>
+            <div class="m-card" style="width:100%;">
+              <div class="m-card-title">📘 The Midnight Library</div>
+              <div class="m-card-sub">Due: 15 Jun 2025</div>
+            </div>
+            <div class="m-card" style="width:100%;">
+              <div class="m-card-title">📗 Atomic Habits</div>
+              <div class="m-card-sub">Due: 20 Jun 2025</div>
+            </div>
+          </div>
+          <div class="m-bottom-nav">
+            <div class="m-nav-item"><div class="m-nav-icon">🏠</div><div class="m-nav-text">Home</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔍</div><div class="m-nav-text">Search</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">🔖</div><div class="m-nav-text">Saved</div></div>
+            <div class="m-nav-item"><div class="m-nav-icon">👤</div><div class="m-nav-text active">Account</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-name">My Account</div>
+    </div>
+
+  </div>
+
+  <!-- Responsive notes -->
+  <div class="responsive-note">
+    <div class="rn-item">
+      <div class="rn-tag">Desktop · 1280px+</div>
+      <h4>Full Layout</h4>
+      <p>Multi-column grid, side-by-side hero with search, horizontal navigation bar, 4-column feature cards, 5-column book row.</p>
+    </div>
+    <div class="rn-item">
+      <div class="rn-tag">Tablet · 768px–1279px</div>
+      <h4>Adapted Layout</h4>
+      <p>2-column grids, stacked hero sections, hamburger menu appears, book cards reduce to 3 per row, search moves below headline.</p>
+    </div>
+    <div class="rn-item">
+      <div class="rn-tag">Mobile · Below 768px</div>
+      <h4>Mobile-First Layout</h4>
+      <p>Single column layout, bottom navigation bar, full-width cards, touch-friendly tap targets (min 44px), collapsible sections.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>City Library — Website UI Redesign</span>
+  <span>Heuristic Eval · Mood Board · Hi-Fi Mockups · Responsive Design</span>
+  <span>UX Design Project · 2025</span>
+</footer>
+
+</body>
+</html>
